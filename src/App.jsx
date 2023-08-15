@@ -1,8 +1,10 @@
+import TodoList from "./TodoList"
+
 function App() {
 
   return (
     <>
-      <div className="text-3xl font-bold">I need </div>
+      <div><TodoList/></div>
     </>
   )
 }
