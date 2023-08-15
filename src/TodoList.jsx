@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { BiSolidEdit } from "react-icons/bi";
+import useLocalStorage from "./hooks/useLocalStorage";
 
 const TodoList = () => {
-    const[taskList, setTaskList] = useState([])
+    const[taskList, setTaskList] = useLocalStorage("list",[])
     const[data, setData] = useState({ id: -1, name: ""})
 
     const handleChange = (e) =>{
