@@ -2,82 +2,110 @@ import { useState, useEffect, useRef } from "react";
 import { FaTrash } from "react-icons/fa";
 import { BiSolidEdit } from "react-icons/bi";
 import useLocalStorage from "./hooks/useLocalStorage";
+import useClickOutside from "./hooks/useClickOutside";
 
 const TodoList = () => {
-  const [taskList, setTaskList] = useLocalStorage("list", []);
-  const [data, setData] = useState({ id: -1, name: "" });
-  const [isEditActive, setIsEditActive] = useState({ id: -1, name: "" });
+  const [taskList, setTaskList] = useLocalStorage("task", []);
+  const [data, setData] = useState({
+    id: -1,
+    name: "",
+    isEditable: false,
+    newName: "",
+  }); 
+
+  useEffect(() =>{
+    const newArray = taskList.map((task) => {
+      return (
+        {...task, isEditable:false}
+      )
+    })
+    setTaskList(newArray);
+
+  }, [])
+
+  const ref = useRef(null);
 
   const handleChange = (e) => {
-    setData({ id: Math.round(Math.random() * 9999), name: e.target.value });
+    setData({
+      id: Math.round(Math.random() * 9999),
+      name: e.target.value,
+      isEditable: false,
+      newName: "",
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setTaskList([data, ...taskList]);
-    setData({ id: -1, name: "" });
+    setData({name: ""});
   };
 
   const handleDeleteClick = (id) => {
     setTaskList(taskList?.filter((task) => task.id !== id));
   };
-
-  const handleEditClick = (list) => {
-    setIsEditActive({ id: list.id, name: list.name });
-  };
-
-  const handleEditChange = (e) => {
-    setIsEditActive({ ...isEditActive, name: e.target.value });
-  };  
-
-  const handleEditSubmit = () => {
-    const newArray = taskList.map((task) => {
-      if (task?.id === isEditActive.id) {
-        return isEditActive
-      } else {
-        return task;
-      }
-    });
-    console.log(newArray);
+  
+  const handleEditClick = (id) => {
+    const newArray = taskList.map((task) =>
+    task.id === id ? { ...task,newName: task.name, isEditable: !task.isEditable } : task
+    );
     setTaskList(newArray);
-    setIsEditActive({ id: -1, name: "" });
   };
 
-  //   {id: 1, name:'hello'}
-  const renderedList = taskList.map((list, key) => {
+  const handleEditChange = (e, id) => {
+    const newArray = taskList.map((task) => 
+      task.id===id ? { ...task, newName: e.target.value } : task
+    );
+    setTaskList(newArray);
+
+  };
+
+  const handleEditSubmit = (id) => {
+    const newArray = taskList.map((task) => 
+    task.id === id ? { ...task, name: task.newName, isEditable: false} : task );
+    setTaskList(newArray);
+  };
+
+  useClickOutside(ref, () => {
+    const newArray = taskList.map((task) => 
+    task.isEditable ? {...task, name: task.name, isEditable: false, newName: task.name} : task)
+    setTaskList(newArray);
+    console.log();
+  });
+
+  const renderedList = taskList.map((task, key) => {
     return (
       <div
         key={key}
         className="flex items-center justify-between py-3 px-5 bg-violet-500 text-white font-semibold rounded-md"
       >
-        {list.id === isEditActive.id ? (
-          <form className="flex" onSubmit={handleEditSubmit} >
+        {task.isEditable ? (
+          <form  className="flex" onSubmit={() => handleEditSubmit(task.id)}>
             <input
               type="text"
-              value={isEditActive.name}
+              value={task.newName}
               className="bg-violet-500  text-white 
                         border border-violet-500  placeholder:text-md placeholder:text-white w-80
                         outline outline-none"
-              onChange={handleEditChange}
+              onChange={(e)=>handleEditChange(e, task.id)}
               autoFocus
             />
             <button
               type="submit"
               className="bg-violet-500 text-white font-semibold px-3"
-              disabled={isEditActive.name === ""}
+              disabled={task.newName === ""}
             >
               Edit
             </button>
           </form>
         ) : (
           <>
-            {list.name}
+            {task.name}
             <div className="flex space-x-2">
               <div className="text-[20px]">
-                <BiSolidEdit onClick={() => handleEditClick(list)} />
+                <BiSolidEdit onClick={() => handleEditClick(task.id)} />
               </div>
               <div className="text-[16px]">
-                <FaTrash onClick={() => handleDeleteClick(list.id)} />
+                <FaTrash onClick={() => handleDeleteClick(task.id)} />
               </div>
             </div>
           </>
@@ -111,7 +139,7 @@ const TodoList = () => {
             Add Task
           </button>
         </form>
-        <div className="space-y-5">{renderedList}</div>
+        <div ref={ref} className="space-y-5">{renderedList}</div>
       </div>
     </div>
   );
