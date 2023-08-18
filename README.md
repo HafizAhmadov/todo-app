@@ -1,4 +1,4 @@
-# AbyssTask
+# TODO
 
 ## Getting Started
 
@@ -9,13 +9,13 @@ To get started with this project, follow the instructions below.
 1. Clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/TheScientist01/AbyssTask.git
+   git clone https://github.com/HafizAhmadov/todo-app.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd AbyssTask
+   cd todo-app
    ```
 
 3. Install the required Node modules:
